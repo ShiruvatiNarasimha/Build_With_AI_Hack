@@ -167,6 +167,229 @@ button {
   animation: word-fade 0.35s ease;
 }
 
+/* ─── Agent Insights Panel ─── */
+@keyframes step-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.step-appear {
+  animation: step-appear 0.35s ease-out both;
+}
+
+@keyframes insights-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.3);
+  }
+}
+
+.insights-pulse {
+  animation: insights-pulse 1.5s ease-in-out infinite;
+}
+
+/* ─── Chat Animations ─── */
+@keyframes msg-appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.msg-appear {
+  animation: msg-appear 0.4s ease-out both;
+}
+
+@keyframes welcome-appear {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.welcome-appear {
+  animation: welcome-appear 0.6s ease-out both;
+}
+
+/* ─── Typing Dots ─── */
+@keyframes typing-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.typing-dots span:nth-child(1) {
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+.typing-dots span:nth-child(2) {
+  animation: typing-bounce 1.2s ease-in-out 0.15s infinite;
+}
+.typing-dots span:nth-child(3) {
+  animation: typing-bounce 1.2s ease-in-out 0.3s infinite;
+}
+
+/* ─── Agent Markdown Prose ─── */
+.prose-agent {
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: #334155;
+}
+
+.prose-agent h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #0f172a;
+}
+
+.prose-agent h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-top: 1.25rem;
+  margin-bottom: 0.375rem;
+  color: #0f172a;
+  padding-bottom: 0.375rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.prose-agent h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+  color: #1e293b;
+}
+
+.prose-agent p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-agent ul,
+.prose-agent ol {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+  padding-left: 1.25rem;
+}
+
+.prose-agent li {
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.prose-agent ul > li {
+  list-style-type: disc;
+}
+
+.prose-agent ol > li {
+  list-style-type: decimal;
+}
+
+.prose-agent strong {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.prose-agent a {
+  color: #0d9488;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose-agent a:hover {
+  color: #0f766e;
+}
+
+.prose-agent code {
+  font-size: 0.75rem;
+  background-color: #f1f5f9;
+  color: #475569;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
+}
+
+.prose-agent pre {
+  background-color: #1e293b;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-agent pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: 0.75rem;
+}
+
+.prose-agent blockquote {
+  border-left: 3px solid #cbd5e1;
+  padding-left: 1rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+.prose-agent table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+}
+
+.prose-agent th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid #e2e8f0;
+  color: #1e293b;
+}
+
+.prose-agent td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.prose-agent hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 1rem 0;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
