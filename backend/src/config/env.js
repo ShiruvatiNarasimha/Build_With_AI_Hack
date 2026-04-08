@@ -18,6 +18,8 @@ const envSchema = z.object({
   REFRESH_TOKEN_EXPIRES_IN: z.string().default("30d"),
   REFRESH_TOKEN_COOKIE_NAME: z.string().default("refresh_token"),
   COOKIE_DOMAIN: z.string().optional(),
+  OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY is required."),
+  OPENAI_MODEL: z.string().default("gpt-4.1"),
 });
 
 const parsed = envSchema.safeParse(process.env);
