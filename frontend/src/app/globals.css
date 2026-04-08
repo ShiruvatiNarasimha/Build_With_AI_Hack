@@ -2,25 +2,98 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #262e35;
+  --text-muted: #31373d;
+  --brand-primary: #ff4500;
+  --brand-secondary: #ff5baa;
+  --border-light: rgba(0, 0, 0, 0.05);
+  --font-body: var(--font-inter);
+  --font-display: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .text-gradient {
+    background: linear-gradient(90deg, #ff4500 0%, #ff5baa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero-line {
+    animation: slide-line 4s infinite linear;
+  }
+}
+
+@keyframes slide-line {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(1536px);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes word-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.play-button-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: rgba(37, 37, 37, 0.5);
+  animation: pulse-ring 2s infinite;
+}
+
+.word-fade {
+  animation: word-fade 0.35s ease;
 }
