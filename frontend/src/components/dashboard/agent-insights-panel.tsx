@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  BarChart3,
   BookOpen,
   Brain,
   CheckCircle2,
+  Database,
   GitBranch,
   GitMerge,
   Loader2,
@@ -36,6 +38,8 @@ const ICON_MAP: Record<
   "git-merge": GitMerge,
   sparkles: Sparkles,
   "shield-check": ShieldCheck,
+  database: Database,
+  "bar-chart": BarChart3,
 };
 
 const ICON_STYLES: Record<string, { active: string; completed: string }> = {
@@ -66,6 +70,14 @@ const ICON_STYLES: Record<string, { active: string; completed: string }> = {
   "shield-check": {
     active: "text-emerald-500 bg-emerald-100 shadow-emerald-200/50",
     completed: "text-emerald-600 bg-emerald-50",
+  },
+  database: {
+    active: "text-rose-500 bg-rose-100 shadow-rose-200/50",
+    completed: "text-rose-600 bg-rose-50",
+  },
+  "bar-chart": {
+    active: "text-sky-500 bg-sky-100 shadow-sky-200/50",
+    completed: "text-sky-600 bg-sky-50",
   },
 };
 
@@ -113,7 +125,12 @@ export function AgentInsightsPanel({
   const allDone = isComplete && steps.length > 0;
 
   const hasPlanning = completedCount >= 2;
-  const hasResearch = completedCount >= 5;
+  const hasLiveData = steps.some(
+    (s) => s.icon === "database" && s.status === "completed",
+  );
+  const hasResearch = steps.some(
+    (s) => s.icon === "book-open" && s.status === "completed",
+  );
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -157,7 +174,7 @@ export function AgentInsightsPanel({
             Strategy
           </p>
           <p className="mt-0.5 text-xs font-semibold text-slate-800">
-            Full pipeline · reasoning
+            {hasLiveData ? "Live data + reasoning" : "Full pipeline · reasoning"}
           </p>
         </div>
       </div>
@@ -169,6 +186,13 @@ export function AgentInsightsPanel({
           label="Deep Reasoning"
           active={hasPlanning}
           colorClass="bg-purple-50 text-purple-600 border-purple-100"
+          inactiveClass="bg-slate-50 text-slate-400 border-slate-100"
+        />
+        <StatusBadge
+          icon={Database}
+          label="Live Data"
+          active={hasLiveData}
+          colorClass="bg-rose-50 text-rose-600 border-rose-100"
           inactiveClass="bg-slate-50 text-slate-400 border-slate-100"
         />
         <StatusBadge
@@ -240,12 +264,14 @@ export function AgentInsightsPanel({
         </div>
       )}
 
-      {isActive && !isComplete && hasResearch && (
+      {isActive && !isComplete && (hasResearch || hasLiveData) && (
         <div className="mx-4 mb-4">
           <div className="flex items-center gap-3 rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3">
             <Loader2 size={14} className="animate-spin text-blue-500 shrink-0" />
             <p className="text-[11px] font-medium text-blue-700">
-              Synthesizing final analysis...
+              {hasLiveData
+                ? "Analyzing live data and synthesizing..."
+                : "Synthesizing final analysis..."}
             </p>
           </div>
         </div>
