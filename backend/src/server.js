@@ -1,34 +1,28 @@
-require("dotenv").config();
+const { app } = require("./app");
+const { env } = require("./config/env");
+const { prisma } = require("./lib/prisma");
 
-const express = require("express");
-const cors = require("cors");
-
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (_req, res) => {
-  res.json({
-    message: "Express backend is running.",
-  });
+const server = app.listen(env.PORT, () => {
+  console.log(`Backend server is running on http://localhost:${env.PORT}`);
 });
 
-app.get("/api/health", (_req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "API is healthy.",
+async function shutdown(signal) {
+  console.log(`${signal} received. Shutting down backend gracefully...`);
+
+  server.close(async () => {
+    await prisma.$disconnect();
+    process.exit(0);
   });
+
+  setTimeout(() => {
+    process.exit(1);
+  }, 10_000).unref();
+}
+
+process.on("SIGINT", () => {
+  void shutdown("SIGINT");
 });
 
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route not found: ${req.method} ${req.originalUrl}`,
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`Backend server is running on http://localhost:${PORT}`);
+process.on("SIGTERM", () => {
+  void shutdown("SIGTERM");
 });

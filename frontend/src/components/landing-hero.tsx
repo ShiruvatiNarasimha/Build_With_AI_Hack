@@ -1,18 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { Loader2 } from "lucide-react";
 
-const NAV_ITEMS = ["Blogs", "Case Studies", "Careers", "Team", "Pricing"];
+import { useAuth } from "@/hooks/use-auth";
+
+const NAV_ITEMS = [
+  { href: "/blogs", label: "Blogs" },
+  { href: "/case-studies", label: "Case Studies" },
+  { href: "#careers", label: "Careers" },
+  { href: "/about", label: "Team" },
+  { href: "/pricing", label: "Pricing" },
+];
 const HERO_WORDS = ["work.", "convert.", "scale.", "trend."];
 
 const bgGridUrl =
   "https://cdn.prod.website-files.com/65783e649367bc55fecaea2d/65a15ff34f2dc4ded14b40e1_BG%20Grids%20hero.svg";
-const heroPreviewUrl =
-  "https://cdn.prod.website-files.com/65783e649367bc55fecaea2d/689c9b4cd2669981b41d134c_Web%20Layout.webp";
 
 export default function LandingHero() {
   const [activeWordIndex, setActiveWordIndex] = useState(0);
+  const { signOut, status, user } = useAuth();
+
+  const userLabel = useMemo(() => {
+    if (!user) {
+      return null;
+    }
+
+    return user.name || user.email.split("@")[0];
+  }, [user]);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -50,54 +67,90 @@ export default function LandingHero() {
           </div>
         </div>
 
-        <nav className="fixed top-4 left-1/2 z-30 flex w-[calc(100%-1.5rem)] max-w-[712px] -translate-x-1/2 items-center justify-between rounded-2xl border border-white/20 bg-white/50 px-3 py-2 shadow-[0_4px_6px_0_rgba(0,0,0,0.1)] backdrop-blur-md sm:top-8 sm:w-[90%] sm:px-4">
-          <a href="#" className="flex items-center" aria-label="Crux AI home">
+        <nav className="fixed top-4 left-1/2 z-30 flex w-[calc(100%-1.5rem)] max-w-[860px] -translate-x-1/2 items-center justify-between rounded-2xl border border-white/20 bg-white/60 px-3 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.08)] backdrop-blur-md sm:top-8 sm:w-[90%] sm:px-4">
+          <Link
+            href="/"
+            className="flex items-center"
+            aria-label="Crux AI home"
+          >
             <NavLogo />
-          </a>
+          </Link>
 
-          <div className="hidden items-center gap-8 md:flex">
+          <div className="hidden items-center gap-6 lg:flex">
             {NAV_ITEMS.map((item) => (
-              <a
-                key={item}
-                href="#"
+              <Link
+                key={item.label}
+                href={item.href}
                 className="text-sm font-medium text-[#262e35] transition-colors hover:text-[#ff4500]"
               >
-                {item}
-              </a>
+                {item.label}
+              </Link>
             ))}
           </div>
 
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-lg bg-black px-5 py-2 text-xs font-semibold text-white transition-colors hover:bg-zinc-800 sm:text-sm"
-          >
-            Sign Up
-          </button>
+          {status === "authenticated" && userLabel ? (
+            <div className="flex items-center gap-2">
+              <div className="hidden items-center gap-3 rounded-full border border-black/5 bg-white/80 px-2 py-1 pr-3 sm:flex">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111111] text-sm font-semibold text-white">
+                  {userLabel.slice(0, 1).toUpperCase()}
+                </div>
+                <div className="text-left">
+                  <div className="max-w-[140px] truncate text-sm font-semibold text-zinc-900">
+                    {userLabel}
+                  </div>
+                  <div className="max-w-[140px] truncate text-xs text-zinc-500">
+                    {user?.email}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  void signOut();
+                }}
+                className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-zinc-800 sm:text-sm"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/signin"
+                className="hidden rounded-lg px-4 py-2 text-sm font-medium text-[#262e35] transition-colors hover:bg-black/5 sm:inline-flex"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center rounded-lg bg-black px-5 py-2 text-xs font-semibold text-white transition-colors hover:bg-zinc-800 sm:text-sm"
+              >
+                {status === "loading" ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Preparing
+                  </>
+                ) : (
+                  "Sign Up"
+                )}
+              </Link>
+            </div>
+          )}
         </nav>
 
         <div className="relative z-20 flex w-full max-w-[1180px] flex-col items-center px-5 pb-20 pt-36 text-center sm:px-10 sm:pb-28 sm:pt-48">
-          {/* <div className="flex items-center gap-1">
-              <AnnouncementIcon />
-              <span className="text-base font-normal text-[#ff4500]">
-                Announcement:
-              </span>
-            </div> */}
-          {/* <span className="text-base font-normal text-[#262e35]">
-              $2.6M Seed Round
-            </span> */}
-          {/* <ArrowRightIcon className="h-4 w-4 text-[#262e35] transition-transform group-hover:translate-x-0.5" /> */}
-
-          {/* <div className="mb-4 flex items-center justify-center gap-2 text-sm font-normal text-black/60">
-            <span>Backed by</span>
-            <YCombinatorMark />
+          {/* <div className="mb-5 inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-black/5 bg-white/80 px-4 py-2 text-sm text-zinc-600 shadow-sm backdrop-blur-sm">
+            <span className="inline-flex h-2 w-2 rounded-full bg-[#ff4500]" />
+            Google-first auth is live and backed by your new Express + Prisma API
           </div> */}
 
           <div className="mb-8 space-y-2">
             <h1 className="font-display text-[clamp(2.9rem,7vw,3.8rem)] leading-[1.1] font-light tracking-[-1.5px] text-[#262e35]">
-              AI Creative Strategist
+              Global Valuation Data
             </h1>
             <h2 className="font-display text-[clamp(2.65rem,6.8vw,3.6rem)] leading-[1.1] font-medium tracking-[-1.5px] text-[#262e35]">
-              To make ads that{" "}
+              AI Insights{" "}
               <span
                 key={HERO_WORDS[activeWordIndex]}
                 className="text-gradient word-fade inline-block min-w-[3.9ch]"
@@ -105,25 +158,49 @@ export default function LandingHero() {
                 {HERO_WORDS[activeWordIndex]}
               </span>
             </h2>
-            <p className="mx-auto mt-2 max-w-[513px] text-[clamp(1.1rem,2.6vw,1.375rem)] leading-[1.5] font-light tracking-[-0.2px] text-[#31373d]">
-              Stop guessing what works and create a repeatable winning formula
-              for your ads
+            <p className="mx-auto mt-2 max-w-[600px] text-[clamp(1.1rem,2.6vw,1.375rem)] leading-[1.5] font-light tracking-[-0.2px] text-[#31373d]">
+              Build comps in minutes, not days. Generate clean, defensible
+              multiples with AI, create dynamic peer sets instantly, and export
+              straight to Excel. No $20K data subscriptions. No manual grind.
             </p>
           </div>
 
-          {/* <div className="mb-10 sm:mb-14">
-            <a
-              href="https://calendly.com/atharva-getcrux/30min"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-xl bg-[linear-gradient(132deg,#FF4602_0%,#FF5892_100%)] px-6 py-4 text-lg font-semibold text-white shadow-[0_-1px_6px_0_rgba(0,0,0,0.12),0_1px_6px_0_rgba(0,0,0,0.12)] transition-transform duration-300 hover:scale-105"
-            >
-              Talk to Founders
-            </a>
-          </div> */}
+          <div className="mb-10 flex flex-wrap items-center justify-center gap-3 sm:mb-14">
+            {status === "authenticated" ? (
+              <>
+                <span className="rounded-full border border-black/10 bg-white/80 px-4 py-3 text-sm font-medium text-zinc-700 shadow-sm">
+                  Signed in as {userLabel}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void signOut();
+                  }}
+                  className="inline-flex items-center justify-center rounded-xl bg-[linear-gradient(132deg,#FF4602_0%,#FF5892_100%)] px-6 py-4 text-lg font-semibold text-white shadow-[0_-1px_6px_0_rgba(0,0,0,0.12),0_1px_6px_0_rgba(0,0,0,0.12)] transition-transform duration-300 hover:scale-105"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center justify-center rounded-xl bg-[linear-gradient(132deg,#FF4602_0%,#FF5892_100%)] px-6 py-4 text-lg font-semibold text-white shadow-[0_-1px_6px_0_rgba(0,0,0,0.12),0_1px_6px_0_rgba(0,0,0,0.12)] transition-transform duration-300 hover:scale-105"
+                >
+                  Create Account
+                </Link>
+                <Link
+                  href="/signin"
+                  className="inline-flex items-center justify-center rounded-xl border border-black/10 bg-white/85 px-6 py-4 text-lg font-semibold text-zinc-900 shadow-sm transition-colors hover:bg-white"
+                >
+                  Sign In
+                </Link>
+              </>
+            )}
+          </div>
 
           <div className="group relative aspect-[1180/688] w-full max-w-[1180px]">
-            <div className="h-full w-full overflow-hidden rounded-[19.2px] shadow-[0_62px_62px_0_rgba(56,62,71,0.03),0_38px_38px_0_rgba(56,62,71,0.04),0_24px_24px_0_rgba(56,62,71,0.02),0_18px_14px_0_rgba(56,62,71,0.05),0_7px_7px_0_rgba(56,62,71,0.04),0_4px_4px_0_rgba(56,62,71,0.03),0_2px_2px_0_rgba(20,65,150,0.1),0_-8px_80px_0_rgba(38,109,240,0.05)]">
+            {/* <div className="h-full w-full overflow-hidden rounded-[19.2px] shadow-[0_62px_62px_0_rgba(56,62,71,0.03),0_38px_38px_0_rgba(56,62,71,0.04),0_24px_24px_0_rgba(56,62,71,0.02),0_18px_14px_0_rgba(56,62,71,0.05),0_7px_7px_0_rgba(56,62,71,0.04),0_4px_4px_0_rgba(56,62,71,0.03),0_2px_2px_0_rgba(20,65,150,0.1),0_-8px_80px_0_rgba(38,109,240,0.05)]">
               <Image
                 src={heroPreviewUrl}
                 alt="Web layout preview"
@@ -131,7 +208,7 @@ export default function LandingHero() {
                 sizes="(min-width: 1280px) 1180px, 100vw"
                 className="rounded-[11px] object-cover"
               />
-            </div>
+            </div> */}
 
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative flex h-20 w-20 items-center justify-center">
