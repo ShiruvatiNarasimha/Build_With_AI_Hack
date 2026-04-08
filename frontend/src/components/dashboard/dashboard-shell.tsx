@@ -7,8 +7,6 @@ import {
   useRef,
   useState,
 } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import {
   ArrowRightLeft,
   ArrowUp,
@@ -24,7 +22,7 @@ import {
   LogOut,
   Menu,
   MessageSquare,
-  PanelLeftOpen,
+  PanelRightOpen,
   Paperclip,
   Plus,
   Search,
@@ -42,6 +40,7 @@ import {
   type ValuationStreamResult,
 } from "@/lib/valuation-client";
 import { AgentInsightsPanel } from "./agent-insights-panel";
+import { AssistantMessage, UserMessage } from "./chat-message";
 
 /* ─── Types & Constants ─── */
 
@@ -55,8 +54,8 @@ interface ChatMessage {
 const WORKSPACE_SECTIONS = [
   {
     id: "valuation",
-    label: "Valuation Suite",
-    description: "Run DCF, comps, and scenario analysis.",
+    label: "Chat Agents",
+    description: "Talk to specialized finance and market agents.",
     icon: ChartLine,
     accent: {
       active: "border-l-blue-500 bg-blue-50/70",
@@ -232,51 +231,70 @@ export function DashboardShell() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f8f9fb] font-sans antialiased">
-      {/* ─── LEFT: Thinking Panel ─── */}
-      <div
-        className={`hidden shrink-0 border-r border-slate-200/60 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden lg:block ${
-          showInsights ? "w-[370px]" : "w-0"
+      {/* ─── LEFT 1: SaaS Sidebar (Desktop) ─── */}
+      <aside
+        className={`hidden shrink-0 border-r border-slate-200/60 bg-white transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:flex lg:flex-col ${
+          sidebarCollapsed ? "w-[72px]" : "w-[280px]"
         }`}
       >
-        <div className="h-full w-[370px]">
-          <AgentInsightsPanel
-            steps={agentSteps}
-            isActive={isProcessing}
-            isComplete={insightsComplete}
-            totalDuration={totalDuration}
-            onClose={() => setShowInsights(false)}
-          />
-        </div>
-      </div>
+        <SaasSidebar
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((p) => !p)}
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
+          recentChats={recentChats}
+          user={user}
+          onSignOut={signOut}
+          onNewChat={handleNewChat}
+        />
+      </aside>
 
-      {/* Mobile Thinking Panel Overlay */}
-      {showInsights && (
+      {/* Mobile Sidebar Overlay (slides from left) */}
+      {mobileSidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-slate-900/30 backdrop-blur-[2px]"
-            onClick={() => setShowInsights(false)}
-            aria-label="Close insights"
+            onClick={() => setMobileSidebarOpen(false)}
+            aria-label="Close sidebar"
           />
-          <aside className="relative h-full w-[340px] border-r border-slate-200 bg-white shadow-2xl">
-            <AgentInsightsPanel
-              steps={agentSteps}
-              isActive={isProcessing}
-              isComplete={insightsComplete}
-              totalDuration={totalDuration}
-              onClose={() => setShowInsights(false)}
+          <aside className="absolute left-0 top-0 h-full w-[300px] border-r border-slate-200 bg-white shadow-2xl">
+            <SaasSidebar
+              collapsed={false}
+              onToggleCollapse={() => setMobileSidebarOpen(false)}
+              activeSection={activeSection}
+              onSectionChange={(id) => {
+                setActiveSection(id);
+                setMobileSidebarOpen(false);
+              }}
+              recentChats={recentChats}
+              user={user}
+              onSignOut={signOut}
+              onNewChat={() => {
+                handleNewChat();
+                setMobileSidebarOpen(false);
+              }}
+              isMobile
             />
           </aside>
         </div>
       )}
 
-      {/* ─── CENTER: Chat ─── */}
+      {/* ─── CENTER: Chat Area ─── */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Header */}
         <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl">
           <div className="flex items-center justify-between px-4 py-2.5 lg:px-6">
             <div className="flex items-center gap-2">
-              {/* Mobile: insights toggle */}
+              {/* Mobile: sidebar toggle */}
+              <button
+                type="button"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm lg:hidden"
+                onClick={() => setMobileSidebarOpen(true)}
+              >
+                <Menu size={15} />
+              </button>
+              {/* Insights toggle */}
               {!showInsights && hasMessages && (
                 <button
                   type="button"
@@ -284,17 +302,9 @@ export function DashboardShell() {
                   className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
                   title="Show agent insights"
                 >
-                  <PanelLeftOpen size={15} />
+                  <PanelRightOpen size={15} />
                 </button>
               )}
-              <div className="flex items-center gap-2 lg:hidden">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-slate-800 to-slate-900">
-                  <Zap size={12} className="text-white" />
-                </div>
-                <span className="text-sm font-bold text-slate-900">
-                  Crux AI
-                </span>
-              </div>
               <div className="hidden items-center gap-1.5 lg:flex">
                 <span className="text-xs font-medium text-slate-400">
                   {WORKSPACE_SECTIONS.find((s) => s.id === activeSection)
@@ -303,11 +313,19 @@ export function DashboardShell() {
                 {hasMessages && (
                   <>
                     <ChevronRight size={12} className="text-slate-300" />
-                    <span className="max-w-[240px] truncate text-xs font-medium text-slate-700">
+                    <span className="max-w-[300px] truncate text-xs font-medium text-slate-700">
                       {messages.find((m) => m.role === "user")?.content}
                     </span>
                   </>
                 )}
+              </div>
+              <div className="flex items-center gap-2 lg:hidden">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-slate-800 to-slate-900">
+                  <Zap size={12} className="text-white" />
+                </div>
+                <span className="text-sm font-bold text-slate-900">
+                  Crux AI
+                </span>
               </div>
             </div>
 
@@ -318,14 +336,6 @@ export function DashboardShell() {
                 title="Search"
               >
                 <Search size={15} />
-              </button>
-              {/* Mobile sidebar toggle */}
-              <button
-                type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm lg:hidden"
-                onClick={() => setMobileSidebarOpen(true)}
-              >
-                <Menu size={15} />
               </button>
             </div>
           </div>
@@ -346,13 +356,13 @@ export function DashboardShell() {
               <div className="space-y-6">
                 {messages.map((msg) =>
                   msg.role === "user" ? (
-                    <UserBubble
+                    <UserMessage
                       key={msg.id}
-                      message={msg}
+                      content={msg.content}
                       userName={user?.name}
                     />
                   ) : (
-                    <AssistantBubble key={msg.id} message={msg} />
+                    <AssistantMessage key={msg.id} content={msg.content} />
                   ),
                 )}
 
@@ -446,50 +456,39 @@ export function DashboardShell() {
         </div>
       </div>
 
-      {/* ─── RIGHT: SaaS Sidebar (Desktop) ─── */}
-      <aside
-        className={`hidden shrink-0 border-l border-slate-200/60 bg-white transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:flex lg:flex-col ${
-          sidebarCollapsed ? "w-[72px]" : "w-[280px]"
+      {/* ─── RIGHT: Thinking Panel ─── */}
+      <div
+        className={`hidden shrink-0 border-l border-slate-200/60 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden lg:block ${
+          showInsights ? "w-[370px]" : "w-0"
         }`}
       >
-        <SaasSidebar
-          collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed((p) => !p)}
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-          recentChats={recentChats}
-          user={user}
-          onSignOut={signOut}
-          onNewChat={handleNewChat}
-        />
-      </aside>
+        <div className="h-full w-[370px]">
+          <AgentInsightsPanel
+            steps={agentSteps}
+            isActive={isProcessing}
+            isComplete={insightsComplete}
+            totalDuration={totalDuration}
+            onClose={() => setShowInsights(false)}
+          />
+        </div>
+      </div>
 
-      {/* Mobile Sidebar Overlay */}
-      {mobileSidebarOpen && (
+      {/* Mobile Thinking Panel Overlay (slides from right) */}
+      {showInsights && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-slate-900/30 backdrop-blur-[2px]"
-            onClick={() => setMobileSidebarOpen(false)}
-            aria-label="Close sidebar"
+            onClick={() => setShowInsights(false)}
+            aria-label="Close insights"
           />
-          <aside className="absolute right-0 top-0 h-full w-[300px] border-l border-slate-200 bg-white shadow-2xl">
-            <SaasSidebar
-              collapsed={false}
-              onToggleCollapse={() => setMobileSidebarOpen(false)}
-              activeSection={activeSection}
-              onSectionChange={(id) => {
-                setActiveSection(id);
-                setMobileSidebarOpen(false);
-              }}
-              recentChats={recentChats}
-              user={user}
-              onSignOut={signOut}
-              onNewChat={() => {
-                handleNewChat();
-                setMobileSidebarOpen(false);
-              }}
-              isMobile
+          <aside className="absolute right-0 top-0 h-full w-[340px] border-l border-slate-200 bg-white shadow-2xl">
+            <AgentInsightsPanel
+              steps={agentSteps}
+              isActive={isProcessing}
+              isComplete={insightsComplete}
+              totalDuration={totalDuration}
+              onClose={() => setShowInsights(false)}
             />
           </aside>
         </div>
@@ -552,7 +551,7 @@ function SaasSidebar({
               className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
               title={isMobile ? "Close" : "Collapse sidebar"}
             >
-              {isMobile ? <X size={14} /> : <ChevronsRight size={14} />}
+              {isMobile ? <X size={14} /> : <ChevronsLeft size={14} />}
             </button>
           </>
         )}
@@ -650,6 +649,35 @@ function SaasSidebar({
         </nav>
       </div>
 
+      {/* Valuation Suite Link */}
+      <div className={`mt-4 ${collapsed ? "px-2" : "px-4"}`}>
+        {!collapsed && (
+          <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Tools
+          </p>
+        )}
+        <a
+          href="/dashboard/valuation-suite"
+          className={`flex items-center gap-3 rounded-xl border border-dashed border-slate-200 px-3 py-2.5 transition-all hover:border-violet-300 hover:bg-violet-50/50 ${
+            collapsed ? "justify-center" : ""
+          }`}
+        >
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-100 to-blue-100 text-violet-600">
+            <BadgeDollarSign size={16} />
+          </div>
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold text-slate-700">
+                Valuation Suite
+              </p>
+              <p className="mt-0.5 truncate text-[11px] leading-tight text-slate-400">
+                7-step AI valuation workflow
+              </p>
+            </div>
+          )}
+        </a>
+      </div>
+
       {/* Recent Chats */}
       {!collapsed && recentChats.length > 0 && (
         <div className="mt-5 flex-1 overflow-y-auto px-4">
@@ -688,7 +716,7 @@ function SaasSidebar({
               className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
               title="Expand sidebar"
             >
-              <ChevronsLeft size={14} />
+              <ChevronsRight size={14} />
             </button>
             <button
               type="button"
@@ -832,38 +860,3 @@ function WelcomeView({
   );
 }
 
-function UserBubble({
-  message,
-  userName,
-}: {
-  message: ChatMessage;
-  userName?: string | null;
-}) {
-  return (
-    <div className="flex items-start justify-end gap-3 msg-appear">
-      <div className="max-w-[85%] rounded-2xl rounded-tr-md bg-slate-900 px-5 py-3.5 text-sm leading-relaxed text-white shadow-sm">
-        {message.content}
-      </div>
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-[11px] font-bold text-white shadow-sm">
-        {userName?.charAt(0)?.toUpperCase() || "U"}
-      </div>
-    </div>
-  );
-}
-
-function AssistantBubble({ message }: { message: ChatMessage }) {
-  return (
-    <div className="flex items-start gap-3 msg-appear">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-blue-500 shadow-sm">
-        <BotMessageSquare size={14} className="text-white" />
-      </div>
-      <div className="max-w-[85%] min-w-0 rounded-2xl rounded-tl-md border border-slate-200/80 bg-white px-5 py-4 shadow-sm">
-        <div className="prose-agent">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {message.content}
-          </ReactMarkdown>
-        </div>
-      </div>
-    </div>
-  );
-}

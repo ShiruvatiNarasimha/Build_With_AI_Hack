@@ -20,6 +20,7 @@ const envSchema = z.object({
   COOKIE_DOMAIN: z.string().optional(),
   OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY is required."),
   OPENAI_MODEL: z.string().default("gpt-4.1"),
+  FMP_API_KEY: z.string().default(""),
 });
 
 const parsed = envSchema.safeParse(process.env);
