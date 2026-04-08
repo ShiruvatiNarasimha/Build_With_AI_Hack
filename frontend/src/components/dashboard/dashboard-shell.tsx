@@ -54,8 +54,8 @@ interface ChatMessage {
 const WORKSPACE_SECTIONS = [
   {
     id: "valuation",
-    label: "Valuation Suite",
-    description: "Run DCF, comps, and scenario analysis.",
+    label: "Chat Agents",
+    description: "Talk to specialized finance and market agents.",
     icon: ChartLine,
     accent: {
       active: "border-l-blue-500 bg-blue-50/70",
@@ -647,6 +647,35 @@ function SaasSidebar({
             );
           })}
         </nav>
+      </div>
+
+      {/* Valuation Suite Link */}
+      <div className={`mt-4 ${collapsed ? "px-2" : "px-4"}`}>
+        {!collapsed && (
+          <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Tools
+          </p>
+        )}
+        <a
+          href="/dashboard/valuation-suite"
+          className={`flex items-center gap-3 rounded-xl border border-dashed border-slate-200 px-3 py-2.5 transition-all hover:border-violet-300 hover:bg-violet-50/50 ${
+            collapsed ? "justify-center" : ""
+          }`}
+        >
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-100 to-blue-100 text-violet-600">
+            <BadgeDollarSign size={16} />
+          </div>
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold text-slate-700">
+                Valuation Suite
+              </p>
+              <p className="mt-0.5 truncate text-[11px] leading-tight text-slate-400">
+                7-step AI valuation workflow
+              </p>
+            </div>
+          )}
+        </a>
       </div>
 
       {/* Recent Chats */}
