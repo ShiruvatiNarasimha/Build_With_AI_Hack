@@ -4,7 +4,6 @@ const cookieParser = require("cookie-parser");
 
 const { env } = require("./config/env");
 const ApiError = require("./utils/api-error");
-const apiRoutes = require("./routes");
 const {
   errorHandler,
   notFoundHandler,
@@ -51,7 +50,11 @@ app.get("/api/health", (_req, res) => {
   res.status(200).json(healthPayload());
 });
 
-app.use("/api", apiRoutes);
+// Defer require("./routes") so /health and / do not load Prisma or route modules.
+app.use("/api", (req, res, next) => {
+  const apiRoutes = require("./routes");
+  apiRoutes(req, res, next);
+});
 app.use(notFoundHandler);
 app.use(errorHandler);
 

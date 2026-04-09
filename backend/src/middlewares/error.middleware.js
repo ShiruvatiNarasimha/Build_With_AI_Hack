@@ -1,4 +1,3 @@
-const { Prisma } = require("@prisma/client");
 const { ZodError } = require("zod");
 
 const ApiError = require("../utils/api-error");
@@ -18,12 +17,11 @@ function errorHandler(error, _req, res, _next) {
     details = error.flatten();
   }
 
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    if (error.code === "P2002") {
-      statusCode = 409;
-      message = "A record with this value already exists.";
-      details = error.meta;
-    }
+  // Avoid require("@prisma/client") at module load (breaks cold starts / health).
+  if (error.name === "PrismaClientKnownRequestError" && error.code === "P2002") {
+    statusCode = 409;
+    message = "A record with this value already exists.";
+    details = error.meta;
   }
 
   if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
