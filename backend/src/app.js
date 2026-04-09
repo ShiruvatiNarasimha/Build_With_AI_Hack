@@ -11,6 +11,11 @@ const {
 
 const app = express();
 
+function mountApiRoutes(req, res, next) {
+  const apiRoutes = require("./routes");
+  apiRoutes(req, res, next);
+}
+
 app.set("trust proxy", 1);
 
 app.use(
@@ -51,10 +56,10 @@ app.get("/api/health", (_req, res) => {
 });
 
 // Defer require("./routes") so /health and / do not load Prisma or route modules.
-app.use("/api", (req, res, next) => {
-  const apiRoutes = require("./routes");
-  apiRoutes(req, res, next);
-});
+// Mounting the router both ways keeps local/dev `/api/*` paths working and
+// also supports frontend proxying to the backend root on Vercel.
+app.use("/api", mountApiRoutes);
+app.use(mountApiRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
