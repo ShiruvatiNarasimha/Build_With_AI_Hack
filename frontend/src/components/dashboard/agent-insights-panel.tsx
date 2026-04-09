@@ -9,6 +9,7 @@ import {
   Database,
   GitBranch,
   GitMerge,
+  Globe,
   Loader2,
   ShieldCheck,
   Sparkles,
@@ -40,6 +41,7 @@ const ICON_MAP: Record<
   "shield-check": ShieldCheck,
   database: Database,
   "bar-chart": BarChart3,
+  globe: Globe,
 };
 
 const ICON_STYLES: Record<string, { active: string; completed: string }> = {
@@ -78,6 +80,10 @@ const ICON_STYLES: Record<string, { active: string; completed: string }> = {
   "bar-chart": {
     active: "text-sky-500 bg-sky-100 shadow-sky-200/50",
     completed: "text-sky-600 bg-sky-50",
+  },
+  globe: {
+    active: "text-violet-500 bg-violet-100 shadow-violet-200/50",
+    completed: "text-violet-600 bg-violet-50",
   },
 };
 
