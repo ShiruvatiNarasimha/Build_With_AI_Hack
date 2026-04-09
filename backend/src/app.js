@@ -58,4 +58,5 @@ app.use("/api", (req, res, next) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-module.exports = { app };
+// Default export required by Vercel's Express runtime (must be the app, not { app }).
+module.exports = app;
