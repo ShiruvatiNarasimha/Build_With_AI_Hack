@@ -41,6 +41,8 @@ import {
 } from "@/lib/valuation-client";
 import { AgentInsightsPanel } from "./agent-insights-panel";
 import { AssistantMessage, UserMessage } from "./chat-message";
+import { ForexPanel } from "./forex-panel";
+import { ERPPanel } from "./erp-panel";
 
 /* ─── Types & Constants ─── */
 
@@ -280,218 +282,255 @@ export function DashboardShell() {
         </div>
       )}
 
-      {/* ─── CENTER: Chat Area ─── */}
-      <div className="flex flex-1 flex-col min-w-0">
-        {/* Header */}
-        <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl">
-          <div className="flex items-center justify-between px-4 py-2.5 lg:px-6">
-            <div className="flex items-center gap-2">
-              {/* Mobile: sidebar toggle */}
-              <button
-                type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm lg:hidden"
-                onClick={() => setMobileSidebarOpen(true)}
-              >
-                <Menu size={15} />
-              </button>
-              {/* Insights toggle */}
-              {!showInsights && hasMessages && (
+      {/* ─── CENTER: Content Area ─── */}
+      {activeSection === "fx" || activeSection === "erp" ? (
+        <div className="flex flex-1 flex-col min-w-0">
+          {/* Section Header */}
+          <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl">
+            <div className="flex items-center justify-between px-4 py-2.5 lg:px-6">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setShowInsights(true)}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
-                  title="Show agent insights"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm lg:hidden"
+                  onClick={() => setMobileSidebarOpen(true)}
                 >
-                  <PanelRightOpen size={15} />
+                  <Menu size={15} />
                 </button>
-              )}
-              <div className="hidden items-center gap-1.5 lg:flex">
-                <span className="text-xs font-medium text-slate-400">
-                  {WORKSPACE_SECTIONS.find((s) => s.id === activeSection)
-                    ?.label ?? "Workspace"}
-                </span>
-                {hasMessages && (
-                  <>
-                    <ChevronRight size={12} className="text-slate-300" />
-                    <span className="max-w-[300px] truncate text-xs font-medium text-slate-700">
-                      {messages.find((m) => m.role === "user")?.content}
-                    </span>
-                  </>
-                )}
-              </div>
-              <div className="flex items-center gap-2 lg:hidden">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-slate-800 to-slate-900">
-                  <Zap size={12} className="text-white" />
+                <div className="hidden items-center gap-1.5 lg:flex">
+                  <span className="text-xs font-medium text-slate-400">
+                    {WORKSPACE_SECTIONS.find((s) => s.id === activeSection)?.label ?? "Workspace"}
+                  </span>
                 </div>
-                <span className="text-sm font-bold text-slate-900">
-                  Crux AI
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
-                title="Search"
-              >
-                <Search size={15} />
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto">
-          {!hasMessages ? (
-            <WelcomeView
-              onSuggestionClick={(s) => {
-                setInputValue(s);
-                handleSubmit(s);
-              }}
-              isAuthenticated={status === "authenticated"}
-            />
-          ) : (
-            <div className="mx-auto max-w-3xl px-4 py-8 lg:px-6">
-              <div className="space-y-6">
-                {messages.map((msg) =>
-                  msg.role === "user" ? (
-                    <UserMessage
-                      key={msg.id}
-                      content={msg.content}
-                      userName={user?.name}
-                    />
-                  ) : (
-                    <AssistantMessage key={msg.id} content={msg.content} />
-                  ),
-                )}
-
-                {isProcessing && (
-                  <div className="flex items-start gap-3 msg-appear">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-blue-500 shadow-sm">
-                      <BotMessageSquare size={14} className="text-white" />
-                    </div>
-                    <div className="rounded-2xl rounded-tl-md border border-slate-200/80 bg-white px-5 py-4 shadow-sm">
-                      <div className="flex items-center gap-2.5">
-                        <div className="typing-dots flex gap-1">
-                          <span className="h-2 w-2 rounded-full bg-teal-400" />
-                          <span className="h-2 w-2 rounded-full bg-teal-400" />
-                          <span className="h-2 w-2 rounded-full bg-teal-400" />
-                        </div>
-                        <span className="text-xs text-slate-400">
-                          Agent is thinking...
-                        </span>
-                      </div>
-                    </div>
+                <div className="flex items-center gap-2 lg:hidden">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-slate-800 to-slate-900">
+                    <Zap size={12} className="text-white" />
                   </div>
-                )}
+                  <span className="text-sm font-bold text-slate-900">
+                    Crux AI
+                  </span>
+                </div>
               </div>
-              <div ref={messagesEndRef} className="h-4" />
             </div>
-          )}
+          </header>
+
+          {/* Panel (takes full remaining height) */}
+          <div className="flex-1 overflow-hidden">
+            {activeSection === "fx" ? <ForexPanel /> : <ERPPanel />}
+          </div>
         </div>
-
-        {/* Input Area */}
-        <div className="border-t border-slate-200/60 bg-white px-4 pb-4 pt-3 lg:px-6 lg:pb-5 lg:pt-4">
-          <div className="mx-auto max-w-3xl">
-            <form
-              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.04)] transition-all focus-within:border-slate-300 focus-within:shadow-[0_4px_32px_rgba(0,0,0,0.08)]"
-              onSubmit={(e: FormEvent) => {
-                e.preventDefault();
-                handleSubmit();
-              }}
-            >
-              <div className="px-4 pb-2 pt-3">
-                <textarea
-                  ref={textareaRef}
-                  value={inputValue}
-                  onChange={(e) => {
-                    setInputValue(e.target.value);
-                    resizeTextarea();
-                  }}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask a valuation question..."
-                  rows={1}
-                  className="w-full resize-none border-0 bg-transparent text-sm leading-6 text-slate-800 outline-none placeholder:text-slate-400"
-                  disabled={isProcessing}
-                />
-              </div>
-
-              <div className="flex items-center justify-between border-t border-slate-100 px-3 py-2">
-                <div className="flex items-center gap-1">
+      ) : (
+        <>
+          <div className="flex flex-1 flex-col min-w-0">
+            {/* Header */}
+            <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl">
+              <div className="flex items-center justify-between px-4 py-2.5 lg:px-6">
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                    title="Attach file"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm lg:hidden"
+                    onClick={() => setMobileSidebarOpen(true)}
                   >
-                    <Paperclip size={15} />
+                    <Menu size={15} />
                   </button>
-                  <ToolPill icon={Atom} label="Advanced Reasoning" />
-                  <ToolPill icon={Sparkles} label="Deep Analysis" />
+                  {!showInsights && hasMessages && (
+                    <button
+                      type="button"
+                      onClick={() => setShowInsights(true)}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
+                      title="Show agent insights"
+                    >
+                      <PanelRightOpen size={15} />
+                    </button>
+                  )}
+                  <div className="hidden items-center gap-1.5 lg:flex">
+                    <span className="text-xs font-medium text-slate-400">
+                      {WORKSPACE_SECTIONS.find((s) => s.id === activeSection)
+                        ?.label ?? "Workspace"}
+                    </span>
+                    {hasMessages && (
+                      <>
+                        <ChevronRight size={12} className="text-slate-300" />
+                        <span className="max-w-[300px] truncate text-xs font-medium text-slate-700">
+                          {messages.find((m) => m.role === "user")?.content}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 lg:hidden">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-slate-800 to-slate-900">
+                      <Zap size={12} className="text-white" />
+                    </div>
+                    <span className="text-sm font-bold text-slate-900">
+                      Crux AI
+                    </span>
+                  </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={!canSend}
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
-                    canSend
-                      ? "bg-slate-900 text-white shadow-sm hover:bg-slate-800 active:scale-95"
-                      : "cursor-not-allowed bg-slate-100 text-slate-300"
-                  }`}
-                >
-                  {isProcessing ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <ArrowUp size={16} />
-                  )}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
+                    title="Search"
+                  >
+                    <Search size={15} />
+                  </button>
+                </div>
               </div>
-            </form>
+            </header>
 
-            <p className="mt-2 text-center text-[11px] text-slate-400">
-              Crux AI may produce inaccurate information. Verify important
-              financial data independently.
-            </p>
+            {/* Chat Area */}
+            <div className="flex-1 overflow-y-auto">
+              {!hasMessages ? (
+                <WelcomeView
+                  onSuggestionClick={(s) => {
+                    setInputValue(s);
+                    handleSubmit(s);
+                  }}
+                  isAuthenticated={status === "authenticated"}
+                />
+              ) : (
+                <div className="mx-auto max-w-3xl px-4 py-8 lg:px-6">
+                  <div className="space-y-6">
+                    {messages.map((msg) =>
+                      msg.role === "user" ? (
+                        <UserMessage
+                          key={msg.id}
+                          content={msg.content}
+                          userName={user?.name}
+                        />
+                      ) : (
+                        <AssistantMessage key={msg.id} content={msg.content} />
+                      ),
+                    )}
+
+                    {isProcessing && (
+                      <div className="flex items-start gap-3 msg-appear">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-blue-500 shadow-sm">
+                          <BotMessageSquare size={14} className="text-white" />
+                        </div>
+                        <div className="rounded-2xl rounded-tl-md border border-slate-200/80 bg-white px-5 py-4 shadow-sm">
+                          <div className="flex items-center gap-2.5">
+                            <div className="typing-dots flex gap-1">
+                              <span className="h-2 w-2 rounded-full bg-teal-400" />
+                              <span className="h-2 w-2 rounded-full bg-teal-400" />
+                              <span className="h-2 w-2 rounded-full bg-teal-400" />
+                            </div>
+                            <span className="text-xs text-slate-400">
+                              Agent is thinking...
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div ref={messagesEndRef} className="h-4" />
+                </div>
+              )}
+            </div>
+
+            {/* Input Area */}
+            <div className="border-t border-slate-200/60 bg-white px-4 pb-4 pt-3 lg:px-6 lg:pb-5 lg:pt-4">
+              <div className="mx-auto max-w-3xl">
+                <form
+                  className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.04)] transition-all focus-within:border-slate-300 focus-within:shadow-[0_4px_32px_rgba(0,0,0,0.08)]"
+                  onSubmit={(e: FormEvent) => {
+                    e.preventDefault();
+                    handleSubmit();
+                  }}
+                >
+                  <div className="px-4 pb-2 pt-3">
+                    <textarea
+                      ref={textareaRef}
+                      value={inputValue}
+                      onChange={(e) => {
+                        setInputValue(e.target.value);
+                        resizeTextarea();
+                      }}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Ask a valuation question..."
+                      rows={1}
+                      className="w-full resize-none border-0 bg-transparent text-sm leading-6 text-slate-800 outline-none placeholder:text-slate-400"
+                      disabled={isProcessing}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-slate-100 px-3 py-2">
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                        title="Attach file"
+                      >
+                        <Paperclip size={15} />
+                      </button>
+                      <ToolPill icon={Atom} label="Advanced Reasoning" />
+                      <ToolPill icon={Sparkles} label="Deep Analysis" />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={!canSend}
+                      className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
+                        canSend
+                          ? "bg-slate-900 text-white shadow-sm hover:bg-slate-800 active:scale-95"
+                          : "cursor-not-allowed bg-slate-100 text-slate-300"
+                      }`}
+                    >
+                      {isProcessing ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <ArrowUp size={16} />
+                      )}
+                    </button>
+                  </div>
+                </form>
+
+                <p className="mt-2 text-center text-[11px] text-slate-400">
+                  Crux AI may produce inaccurate information. Verify important
+                  financial data independently.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* ─── RIGHT: Thinking Panel ─── */}
-      <div
-        className={`hidden shrink-0 border-l border-slate-200/60 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden lg:block ${
-          showInsights ? "w-[370px]" : "w-0"
-        }`}
-      >
-        <div className="h-full w-[370px]">
-          <AgentInsightsPanel
-            steps={agentSteps}
-            isActive={isProcessing}
-            isComplete={insightsComplete}
-            totalDuration={totalDuration}
-            onClose={() => setShowInsights(false)}
-          />
-        </div>
-      </div>
+          {/* ─── RIGHT: Thinking Panel ─── */}
+          <div
+            className={`hidden shrink-0 border-l border-slate-200/60 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden lg:block ${
+              showInsights ? "w-[370px]" : "w-0"
+            }`}
+          >
+            <div className="h-full w-[370px]">
+              <AgentInsightsPanel
+                steps={agentSteps}
+                isActive={isProcessing}
+                isComplete={insightsComplete}
+                totalDuration={totalDuration}
+                onClose={() => setShowInsights(false)}
+              />
+            </div>
+          </div>
 
-      {/* Mobile Thinking Panel Overlay (slides from right) */}
-      {showInsights && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <button
-            type="button"
-            className="absolute inset-0 bg-slate-900/30 backdrop-blur-[2px]"
-            onClick={() => setShowInsights(false)}
-            aria-label="Close insights"
-          />
-          <aside className="absolute right-0 top-0 h-full w-[340px] border-l border-slate-200 bg-white shadow-2xl">
-            <AgentInsightsPanel
-              steps={agentSteps}
-              isActive={isProcessing}
-              isComplete={insightsComplete}
-              totalDuration={totalDuration}
-              onClose={() => setShowInsights(false)}
-            />
-          </aside>
-        </div>
+          {/* Mobile Thinking Panel Overlay (slides from right) */}
+          {showInsights && (
+            <div className="fixed inset-0 z-50 lg:hidden">
+              <button
+                type="button"
+                className="absolute inset-0 bg-slate-900/30 backdrop-blur-[2px]"
+                onClick={() => setShowInsights(false)}
+                aria-label="Close insights"
+              />
+              <aside className="absolute right-0 top-0 h-full w-[340px] border-l border-slate-200 bg-white shadow-2xl">
+                <AgentInsightsPanel
+                  steps={agentSteps}
+                  isActive={isProcessing}
+                  isComplete={insightsComplete}
+                  totalDuration={totalDuration}
+                  onClose={() => setShowInsights(false)}
+                />
+              </aside>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

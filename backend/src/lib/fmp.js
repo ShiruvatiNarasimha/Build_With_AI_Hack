@@ -61,6 +61,46 @@ async function getAnalystEstimates(symbol, limit = 4) {
   return fmpFetch(`/analyst-estimates/${symbol}?limit=${limit}`);
 }
 
+const FMP_V4 = "https://financialmodelingprep.com/api/v4";
+
+async function fmpV4Fetch(endpoint) {
+  const separator = endpoint.includes("?") ? "&" : "?";
+  const url = `${FMP_V4}${endpoint}${separator}apikey=${env.FMP_API_KEY}`;
+  const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+  if (!res.ok) throw new Error(`FMP ${res.status}: ${endpoint}`);
+  return res.json();
+}
+
+async function getMarketRiskPremium() {
+  return fmpV4Fetch("/market_risk_premium");
+}
+
+const FMP_STABLE = "https://financialmodelingprep.com/stable";
+
+async function fmpStableFetch(endpoint) {
+  const separator = endpoint.includes("?") ? "&" : "?";
+  const url = `${FMP_STABLE}${endpoint}${separator}apikey=${env.FMP_API_KEY}`;
+  const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+  if (!res.ok) throw new Error(`FMP ${res.status}: ${endpoint}`);
+  return res.json();
+}
+
+async function getForexList() {
+  return fmpStableFetch("/forex-list");
+}
+
+async function getForexHistorical(symbol, from, to) {
+  let endpoint = `/historical-price-eod/full?symbol=${encodeURIComponent(symbol)}`;
+  if (from) endpoint += `&from=${from}`;
+  if (to) endpoint += `&to=${to}`;
+  return fmpStableFetch(endpoint);
+}
+
+async function getForexQuote(symbol) {
+  const data = await fmpFetch(`/quote/${encodeURIComponent(symbol)}`);
+  return data?.[0] ?? null;
+}
+
 const ENDPOINT_MAP = {
   profile: getCompanyProfile,
   quote: getQuote,
@@ -248,5 +288,9 @@ module.exports = {
   searchSymbol,
   fetchFinancialData,
   formatFinancialDataForAI,
+  getForexList,
+  getForexHistorical,
+  getForexQuote,
+  getMarketRiskPremium,
   ENDPOINT_MAP,
 };
