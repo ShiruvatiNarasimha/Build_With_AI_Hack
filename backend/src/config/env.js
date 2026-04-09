@@ -6,6 +6,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(5000),
   CLIENT_ORIGIN: z.string().default("http://localhost:3000"),
+  VERCEL_URL: z.string().optional(),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required."),
   GOOGLE_CLIENT_ID: z.string().min(1, "GOOGLE_CLIENT_ID is required."),
   JWT_ACCESS_SECRET: z
@@ -33,11 +34,24 @@ if (!parsed.success) {
   throw new Error(`Invalid environment configuration:\n${formattedErrors}`);
 }
 
+function normalizeOrigins(rawOrigins, vercelUrl) {
+  const configuredOrigins = rawOrigins
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  // On Vercel, this keeps preview/prod deployments working even if CLIENT_ORIGIN
+  // was not updated yet. Explicit CLIENT_ORIGIN entries still take precedence.
+  if (vercelUrl) {
+    configuredOrigins.push(`https://${vercelUrl}`);
+  }
+
+  return Array.from(new Set(configuredOrigins));
+}
+
 const env = Object.freeze({
   ...parsed.data,
-  CLIENT_ORIGINS: parsed.data.CLIENT_ORIGIN.split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean),
+  CLIENT_ORIGINS: normalizeOrigins(parsed.data.CLIENT_ORIGIN, parsed.data.VERCEL_URL),
 });
 
 module.exports = { env };
