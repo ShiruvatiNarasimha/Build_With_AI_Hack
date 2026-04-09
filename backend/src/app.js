@@ -37,12 +37,18 @@ app.get("/", (_req, res) => {
   });
 });
 
+const healthPayload = () => ({
+  success: true,
+  message: "API is healthy.",
+  timestamp: new Date().toISOString(),
+});
+
+app.get("/health", (_req, res) => {
+  res.status(200).json(healthPayload());
+});
+
 app.get("/api/health", (_req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "API is healthy.",
-    timestamp: new Date().toISOString(),
-  });
+  res.status(200).json(healthPayload());
 });
 
 app.use("/api", apiRoutes);
