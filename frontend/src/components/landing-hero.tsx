@@ -210,7 +210,7 @@ export default function LandingHero() {
               />
             </div> */}
 
-            <div className="absolute inset-0 flex items-center justify-center">
+            {/* <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative flex h-20 w-20 items-center justify-center">
                 <div className="play-button-pulse absolute inset-0 rounded-full" />
                 <button
@@ -221,7 +221,7 @@ export default function LandingHero() {
                   <PlayIcon />
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
