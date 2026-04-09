@@ -172,6 +172,9 @@ Required keys used by the backend:
 - `NEXT_PUBLIC_API_BASE_URL` (example: `http://localhost:5000/api`)
 - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 
+Deployment note:
+- Set `NEXT_PUBLIC_API_BASE_URL` to the full backend deployment URL. The frontend now uses the `/api` path on its own domain and proxies requests to that backend origin during builds and production deploys.
+
 ## Local Development Setup
 
 ### 1) Install dependencies
@@ -257,3 +260,4 @@ You should receive a success payload with a timestamp.
 
 - This repo currently does not include automated test scripts in `package.json`.
 - If you deploy, ensure environment variables and allowed CORS origins are configured for production domains.
+- On Vercel, the frontend should be deployed with the backend origin in `NEXT_PUBLIC_API_BASE_URL` so `/api/*` requests are proxied instead of relying on browser cross-origin calls.
