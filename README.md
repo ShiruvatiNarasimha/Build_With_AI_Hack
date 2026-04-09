@@ -1,6 +1,6 @@
 # Build with AI (Crux AI)
 
-Full-stack AI-assisted valuation platform with a Next.js frontend and an Express + Prisma backend.
+We are Building a Agentic Ai for Private Equity Firms and angel investors to automate valuations completely end-to-end by lifting 85% manual work.. The valuation has 7 steps automated by agents that does series of action from collecting live and latest data to making decisions
 
 ## What This Project Does
 
